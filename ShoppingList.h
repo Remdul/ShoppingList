@@ -6,6 +6,7 @@ class Item{
 public:
 	Item(std::string itemName, double priceCost);
 	std::string showItem();
+	bool operator < (const Item &rhs);
 private:
 	std::string name;
 	double price;
@@ -14,6 +15,20 @@ private:
 	Item *prevItem;
 };
 
+//Move this to the cpp file
+bool Item::operator < (const Item &rhs)
+{
+	if (price < rhs.price)
+	{
+		return true;
+	}
+	else if (price > rhs.price)
+	{
+		return false;
+	}
+	//the prices are equal
+	return name < rhs.name;
+}
 
 class ShoppingList{
 public:
