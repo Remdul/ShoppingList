@@ -13,5 +13,14 @@ int main(){
 
 	std::cout << myList.showList() << std::endl;
 	std::cout << myList.showSize() << std::endl;
-}
+	
+	Item test1 = Item("Cookies", 6.00);
+	Item test2 = Item("Flour", 4.50);
+	if (test1 > test2){
+		std::cout << "First True" << std::endl;
+	}
+	if (test1 < test2){
+		std::cout << "Second True" << std::endl;
+	}
+}	
 

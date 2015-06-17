@@ -1,34 +1,18 @@
 #include <iostream>
-#include <map>
 
 class Item{
 	friend class ShoppingList;
 public:
-	Item(std::string itemName, double priceCost);
+	Item(const std::string &itemName, double priceCost);
 	std::string showItem();
 	bool operator < (const Item &rhs);
-private:
+	bool operator > (const Item &rhs);
 	std::string name;
 	double price;
 	int itemNumber;
 	Item *nextItem;
 	Item *prevItem;
 };
-
-//Move this to the cpp file
-bool Item::operator < (const Item &rhs)
-{
-	if (price < rhs.price)
-	{
-		return true;
-	}
-	else if (price > rhs.price)
-	{
-		return false;
-	}
-	//the prices are equal
-	return name < rhs.name;
-}
 
 class ShoppingList{
 public:
@@ -38,14 +22,10 @@ public:
 	int showSize();
 	void organize();
 	Item *ShoppingList::at(int index);
-	void merge(std::map<int, double> *a, int*, int, int, int);
-	void mergesort(std::map<int, double> *a, int*b, int low, int high);
-
+	Item *getHead();
+	Item *getTail();
 private:
 	int itemCount;
 	Item *headItem;
 	Item *tailItem;
-	std::map<int, double> *ordering;
-
 };
-

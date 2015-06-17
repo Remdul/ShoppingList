@@ -4,11 +4,31 @@
 #include <sstream>
 #include <map>
 
-Item::Item(std::string itemName, double priceCost){
+Item::Item(const std::string &itemName, double priceCost){
 	name		= itemName;
 	price		= priceCost;
 	nextItem	= NULL;
 	prevItem	= NULL;
+}
+
+bool Item::operator < (const Item &rhs){
+	if (price < rhs.price){
+		return true;
+	}
+	else if (price > rhs.price){
+		return false;
+	}
+	return name < rhs.name;
+}
+
+bool Item::operator > (const Item &rhs){
+	if (price > rhs.price){
+		return true;
+	}
+	else if (price < rhs.price){
+		return false;
+	}
+	return name > rhs.name;
 }
 
 std::string Item::showItem(){
@@ -82,7 +102,7 @@ Item *ShoppingList::at(int index){
 	int indexCounter = 0;
 	while (NULL != findItem){
 		if (NULL == findItem){
-			return;
+			return NULL;
 		}
 		if (indexCounter == index){
 			return findItem;
@@ -90,61 +110,88 @@ Item *ShoppingList::at(int index){
 		findItem = findItem->nextItem;
 		indexCounter += 1;
 	}
-	return;
+	return findItem;
 }
 
 int ShoppingList::showSize(){
 	return itemCount;
 }
+Item *ShoppingList::getHead(){
+	return headItem;
+}
+
+Item *ShoppingList::getTail(){
+	return tailItem;
+}
 
 void ShoppingList::organize(){
 	for (int i = 0; i < itemCount; i++){
-		ordering[at(i)->itemNumber] = at(i)->price;
+		//ordering[at(i)->itemNumber] = at(i)->price;
 	}
 }
 
-void ShoppingList::mergesort(std::map<int, double> *a, int*b, int low, int high){
-	int pivot;
-	if (low<high){
-		pivot = (low + high) / 2;
-		mergesort(ordering, b, low, pivot);
-		mergesort(ordering, b, pivot + 1, high);
-		merge(ordering, b, low, pivot, high);
+
+void frontBackSplit(ShoppingList *list, Item *source){
+	Item *headRefrence = list->getHead();
+	Item *tailRefrence = list->getTail();
+
+	// Length < 2
+	if (source == NULL || source->nextItem == NULL){
+		headRefrence = source;
+		tailRefrence = NULL;
+	}
+	else{
+		Item *slow = source;
+		Item *fast = source->nextItem;
+
+		// Advance FAST Item twice and SLOW Item once
+		while (fast != NULL){
+			fast = fast->nextItem;
+			if (fast != NULL){
+				slow = slow->nextItem;
+				fast = fast->nextItem;
+			}
+		}
+
+		// At this point, slow should be almost halfway through when fast finishes.
+		headRefrence = source;
+		tailRefrence = slow->nextItem;
+		//tailRefrence->prevItem = NULL;
+		slow->nextItem = NULL;
 	}
 }
-void ShoppingList::merge(std::map<int, double> *ordering, int *b, int low, int pivot, int high){
-	int h, i, j, k;
-	h = low;
-	i = low;
-	j = pivot + 1;
+void mergeSort(ShoppingList **mainList){
+	ShoppingList* list = *mainList;
+	ShoppingList *a;
+	ShoppingList *b;
 
-	while ((h <= pivot) && (j <= high)){
-		if (ordering[h] <= ordering[j]){
-			b[i] = ordering[h];
-			h++;
-		}
-		else
-		{
-			b[i] = ordering[j];
-			j++;
-		}
-		i++;
+	// Ignore if 0 or 1 items in list
+	if ((list == NULL) || (list->getHead() == NULL)){
+		return;
 	}
-	if (h>pivot)
-	{
-		for (k = j; k <= high; k++)
-		{
-			b[i] = ordering[k];
-			i++;
-		}
+
+	frontBackSplit(&mainList, &a, &b);
+
+
+}
+
+Item *sortedMerge(Item *a, Item *b){
+	Item *result = NULL;
+
+	if (a == NULL){
+		return b;
 	}
-	else
-	{
-		for (k = h; k <= pivot; k++)
-		{
-			b[i] = ordering[k];
-			i++;
-		}
+	if (b == NULL){
+		return a;
 	}
-	for (k = low; k <= high; k++) ordering[k] = b[k];
+
+	if (a->price <= b->price){
+		result = a;
+		result->nextItem = sortedMerge(a->nextItem, b);
+	}
+	else{
+		result = b;
+		result->nextItem = sortedMerge(a, b->nextItem);
+	}
+	return result;
 }
