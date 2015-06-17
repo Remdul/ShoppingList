@@ -101,9 +101,6 @@ void ShoppingList::organize(){
 	for (int i = 0; i < itemCount; i++){
 		ordering[at(i)->itemNumber] = at(i)->price;
 	}
-
-
-
 }
 
 void ShoppingList::mergesort(std::map<int, double> *a, int*b, int low, int high){
