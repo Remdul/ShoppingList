@@ -98,12 +98,12 @@ void ShoppingList::addItemAtEnd(std::string name, double price){
 	else
 	{
 		Item *newItem = new Item(name, price);
-		newItem->prevItem = tailItem;
+		newItem->prevItem = getTail();
 		itemCount += 1;
 		newItem->itemNumber = itemCount;
-		Item *current = tailItem;
+		Item *current = getTail();
 		current->nextItem = newItem;
-		tailItem = newItem;
+		end->prevItem = newItem;
 	}
 }
 
@@ -155,33 +155,33 @@ Item *ShoppingList::getTail(){
 	return tailItem;
 }
 
-void frontBackSplit(ShoppingList *sourceList, ShoppingList **frontList, ShoppingList **backList){
-	// Length < 2
-	if (sourceList->getHead() == NULL || sourceList->getHead()->nextItem == NULL){
-		*frontList = sourceList;
-		*backList  = NULL;
-	}
-	else{
-		Item *slow = sourceList->getHead();
-		Item *fast = sourceList->getHead()->nextItem;
-
-		// Advance FAST Item twice and SLOW Item once
-		while (fast != NULL){
+void frontBackSplit(Item *sourceListBegin, 
+					Item *sourceListEnd, 
+					Item **frontListBegin, 
+					Item **frontListEnd,
+					Item **backListBegin,
+					Item **backListEnd){
+	*frontListBegin = sourceListBegin;
+	*backListEnd = sourceListEnd;
+	//logic goes here
+	Item *slow = sourceListBegin;
+	Item *fast = sourceListBegin->nextItem;
+	
+	while (fast != sourceListEnd){
+		fast = fast->nextItem;
+		if (fast != sourceListEnd){
+			slow = slow->nextItem;
 			fast = fast->nextItem;
-			if (fast != NULL){
-				slow = slow->nextItem;
-				fast = fast->nextItem;
-			}
 		}
-
-		// At this point, slow should be almost halfway through as fast falls off list.
-		// Split SourceList into frontList and backList
-		*frontList	= sourceList;
-		slow->nextItem->prevItem	= NULL;
-		ShoppingList temp			= ShoppingList(slow->nextItem);
-		*backList					= &temp;
-		slow->nextItem				= NULL;
 	}
+	// FAST at NULL -- SLOW at (1/2)-1 of list
+	frontListBegin = sourceListBegin;
+	frontListEnd = NULL; //If you are copying items instead of moving them for sort you could use slow->nextItem here
+	
+	backListBegin = slow->nextItem;
+	backListEnd = sourceListEnd;
+	frontListEnd->nextItem = NULL;
+	backListBegin->prevItem = NULL;
 }
 
 ShoppingList *sortedMerge(ShoppingList *a, ShoppingList *b){
@@ -199,7 +199,7 @@ ShoppingList *sortedMerge(ShoppingList *a, ShoppingList *b){
 	return result;
 }
 
-void mergeSort(ShoppingList **sourceList){
+void mergeSort(ShoppingList &sourceList){
 	ShoppingList* list = *sourceList;
 	ShoppingList *a;
 	ShoppingList *b;
@@ -208,8 +208,8 @@ void mergeSort(ShoppingList **sourceList){
 	if ((list == NULL) || (list->getHead() == NULL)){
 		return;
 	}
-	// Split Linked Lists
-	frontBackSplit(list, &a, &b);
+	// Split Linked Lists via Objects
+	frontBackSplit(sourceList->headItem, sourceList->tailItem,a->headItem,a->tailItem,b->headItem,b->tailItem);
 	// Sort sublists
 	mergeSort(&a);
 	mergeSort(&b);

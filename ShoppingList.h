@@ -10,6 +10,7 @@ public:
 	std::string name;
 	double price;
 	int itemNumber;
+	
 	Item *nextItem;
 	Item *prevItem;
 };
@@ -23,17 +24,18 @@ public:
 	std::string showList();
 	int showSize();
 	Item *ShoppingList::at(int index);
-	Item *getHead();
-	Item *getTail();
-	void setHead(Item *newItem);
+	Item *getHead() {return end->nextItem;}
+	Item *getTail() {return end->prevItem;}
 
 private:
 	int itemCount;
-	Item *headItem;
-	Item *tailItem;
+	Item *end;
+	
 };
 
 // PROTOTYPES
-void mergeSort(ShoppingList **sourceList);
+void mergeSort(ShoppingList &sourceList);
+void mergeSortInternal(Item *first, Item *last);
 ShoppingList *sortedMerge(ShoppingList *a, ShoppingList *b);
 void frontBackSplit(ShoppingList *sourceList, ShoppingList **frontList, ShoppingList **backList);
+void frontBackSplit(Item *sourceListBegin, Item *sourceListEnd,Item **frontListBegin,Item **frontListEnd,Item **backListBegin,Item **backListEnd);
