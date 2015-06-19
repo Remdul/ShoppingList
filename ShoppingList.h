@@ -17,15 +17,23 @@ public:
 class ShoppingList{
 public:
 	ShoppingList();
-	void  addItemAtEnd(std::string name, double price);
+	ShoppingList(Item *newHeadItem);
+	void addItemAtEnd(std::string name, double price);
+	void addItemAtEnd(Item *newItem);
 	std::string showList();
 	int showSize();
-	void organize();
 	Item *ShoppingList::at(int index);
 	Item *getHead();
 	Item *getTail();
+	void setHead(Item *newItem);
+
 private:
 	int itemCount;
 	Item *headItem;
 	Item *tailItem;
 };
+
+// PROTOTYPES
+void mergeSort(ShoppingList **sourceList);
+ShoppingList *sortedMerge(ShoppingList *a, ShoppingList *b);
+void frontBackSplit(ShoppingList *sourceList, ShoppingList **frontList, ShoppingList **backList);

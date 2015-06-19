@@ -43,6 +43,17 @@ ShoppingList::ShoppingList(){
 	tailItem = NULL;
 }
 
+ShoppingList::ShoppingList(Item *newHeadItem){
+	itemCount = 0;
+	headItem = newHeadItem;
+	tailItem = NULL;
+}
+
+
+void ShoppingList::setHead(Item *newItem){
+	headItem = newItem;
+}
+
 std::string ShoppingList::showList(){
 	Item *printNode = headItem;
 	std::stringstream printList;
@@ -52,7 +63,6 @@ std::string ShoppingList::showList(){
 	}
 
 	printList << "LinkedList Contents: \n";
-
 	int count = 0;
 	while (printNode != NULL){
 		std::cout << count << " : " << printNode->name << " > " << std::endl;
@@ -97,6 +107,25 @@ void ShoppingList::addItemAtEnd(std::string name, double price){
 	}
 }
 
+void ShoppingList::addItemAtEnd(Item *newItem){
+	if (headItem == NULL)
+	{
+		itemCount += 1;
+		newItem->itemNumber = itemCount;
+		headItem = newItem;
+		tailItem = newItem;
+	}
+	else
+	{
+		newItem->prevItem = tailItem;
+		itemCount += 1;
+		newItem->itemNumber = itemCount;
+		Item *current = tailItem;
+		current->nextItem = newItem;
+		tailItem = newItem;
+	}
+}
+
 Item *ShoppingList::at(int index){
 	Item *findItem = headItem;
 	int indexCounter = 0;
@@ -117,32 +146,24 @@ int ShoppingList::showSize(){
 	return itemCount;
 }
 Item *ShoppingList::getHead(){
+	if (headItem == NULL){ return NULL; }
 	return headItem;
 }
 
 Item *ShoppingList::getTail(){
+	if (tailItem == NULL){ return NULL; }
 	return tailItem;
 }
 
-void ShoppingList::organize(){
-	for (int i = 0; i < itemCount; i++){
-		//ordering[at(i)->itemNumber] = at(i)->price;
-	}
-}
-
-
-void frontBackSplit(ShoppingList *list, Item *source){
-	Item *headRefrence = list->getHead();
-	Item *tailRefrence = list->getTail();
-
+void frontBackSplit(ShoppingList *sourceList, ShoppingList **frontList, ShoppingList **backList){
 	// Length < 2
-	if (source == NULL || source->nextItem == NULL){
-		headRefrence = source;
-		tailRefrence = NULL;
+	if (sourceList->getHead() == NULL || sourceList->getHead()->nextItem == NULL){
+		*frontList = sourceList;
+		*backList  = NULL;
 	}
 	else{
-		Item *slow = source;
-		Item *fast = source->nextItem;
+		Item *slow = sourceList->getHead();
+		Item *fast = sourceList->getHead()->nextItem;
 
 		// Advance FAST Item twice and SLOW Item once
 		while (fast != NULL){
@@ -153,15 +174,33 @@ void frontBackSplit(ShoppingList *list, Item *source){
 			}
 		}
 
-		// At this point, slow should be almost halfway through when fast finishes.
-		headRefrence = source;
-		tailRefrence = slow->nextItem;
-		//tailRefrence->prevItem = NULL;
-		slow->nextItem = NULL;
+		// At this point, slow should be almost halfway through as fast falls off list.
+		// Split SourceList into frontList and backList
+		*frontList	= sourceList;
+		slow->nextItem->prevItem	= NULL;
+		ShoppingList temp			= ShoppingList(slow->nextItem);
+		*backList					= &temp;
+		slow->nextItem				= NULL;
 	}
 }
-void mergeSort(ShoppingList **mainList){
-	ShoppingList* list = *mainList;
+
+ShoppingList *sortedMerge(ShoppingList *a, ShoppingList *b){
+	ShoppingList *result = NULL;
+	if (a == NULL){ return b; }
+	if (b == NULL){ return a; }
+	if (a->getHead() < b->getHead()){
+		result = a;
+		sortedMerge(result, b);
+	}
+	else{
+		result = b;
+		sortedMerge(a, result);
+	}
+	return result;
+}
+
+void mergeSort(ShoppingList **sourceList){
+	ShoppingList* list = *sourceList;
 	ShoppingList *a;
 	ShoppingList *b;
 
@@ -169,29 +208,11 @@ void mergeSort(ShoppingList **mainList){
 	if ((list == NULL) || (list->getHead() == NULL)){
 		return;
 	}
-
-	frontBackSplit(&mainList, &a, &b);
-
-
-}
-
-Item *sortedMerge(Item *a, Item *b){
-	Item *result = NULL;
-
-	if (a == NULL){
-		return b;
-	}
-	if (b == NULL){
-		return a;
-	}
-
-	if (a->price <= b->price){
-		result = a;
-		result->nextItem = sortedMerge(a->nextItem, b);
-	}
-	else{
-		result = b;
-		result->nextItem = sortedMerge(a, b->nextItem);
-	}
-	return result;
+	// Split Linked Lists
+	frontBackSplit(list, &a, &b);
+	// Sort sublists
+	mergeSort(&a);
+	mergeSort(&b);
+	// Combine Lists
+	sortedMerge(a, b);
 }
